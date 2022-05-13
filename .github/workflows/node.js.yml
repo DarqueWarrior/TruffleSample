@@ -24,6 +24,7 @@ jobs:
     - run: npm install
     - run: npx truffle compile
     - run: npx truffle test
+    - run: cat ./TEST-results.xml
     - name: Test Reporting
       uses: phoenix-actions/test-reporting@v6
       id: test-report               # Set ID reference for step
