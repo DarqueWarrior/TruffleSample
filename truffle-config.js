@@ -12,7 +12,7 @@ module.exports = {
   mocha: {
     reporter: 'xunit',
     reporterOptions: {
-      output: 'testresults.xml'
+      output: 'TEST-results.xml'
     }
   }
 };
