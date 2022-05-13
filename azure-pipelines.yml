@@ -10,53 +10,53 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: NodeTool@0
-  displayName: 'Use Node.js 16.x'
+- displayName: 'Use Node.js 16.x'
+  task: NodeTool@0
   inputs:
     versionSpec: '16.x'
 
-- script: npm install
-  displayName: 'Install Truffle'
-
-- script: npx truffle compile
-  displayName: 'Compile contracts'
-
-- script: npx truffle test
-  displayName: 'Test contracts'
-
-- task: PublishTestResults@2
-  displayName: 'Publish test results'
+- displayName: 'Install Truffle'
+  script: npm install
+  
+- displayName: 'Compile contracts'
+  script: npx truffle compile
+  
+- displayName: 'Test contracts'
+  script: npx truffle test
+  
+- displayName: 'Publish test results'
+  task: PublishTestResults@2
   inputs:
     testRunTitle: 'Contract'
     testResultsFormat: 'JUnit'
     failTaskOnFailedTests: true
     testResultsFiles: '**/TEST-*.xml'
 
-- task: CopyFiles@2
-  displayName: Package tests
+- displayName: Package tests
+  task: CopyFiles@2
   inputs:
     SourceFolder: './test'
     Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/test'
 
-- script: npm install
-  displayName: 'Install client dependencies'
+- displayName: Package package.json for tests
+  task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)'
+    Contents: 'package.json'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'    
+
+- displayName: 'Install client dependencies'
+  script: npm install
   workingDirectory: $(System.DefaultWorkingDirectory)/client
 
-- script: npm run build
-  displayName: 'Build client'
+- displayName: 'Build client'
+  script: npm run build
   workingDirectory: $(System.DefaultWorkingDirectory)/client
 
-- task: CopyFiles@2
-  displayName: Package front end
+- displayName: Publish client
+  task: PublishPipelineArtifact@1
   inputs:
-    SourceFolder: '$(System.DefaultWorkingDirectory)/client/build'
-    Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/frontend'
-
-- task: PublishPipelineArtifact@1
-  displayName: Publish artifacts
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
-    artifact: 'drop'
+    targetPath: '$(System.DefaultWorkingDirectory)/client/build'
+    artifact: 'client'
     publishLocation: 'pipeline'
