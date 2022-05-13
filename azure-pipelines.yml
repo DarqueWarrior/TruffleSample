@@ -20,3 +20,9 @@ steps:
 
 - script: npx truffle test
   displayName: 'Test Contracts'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'XUnit'
+    testResultsFiles: '**/TEST-*.xml'
+    testRunTitle: 'Contract'
