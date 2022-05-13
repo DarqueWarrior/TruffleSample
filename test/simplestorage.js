@@ -1,7 +1,7 @@
 const SimpleStorage = artifacts.require("./SimpleStorage.sol");
 
 contract("SimpleStorage", accounts => {
-  it("...should store the value 89.", async () => {
+  it("It should store the value 89", async () => {
     const simpleStorageInstance = await SimpleStorage.deployed();
 
     // Set value of 89

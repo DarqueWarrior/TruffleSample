@@ -10,10 +10,8 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: Npm@1
-  inputs:
-    command: 'install'
-  displayName: Install Truffle
+- script: npm install
+  displayName: 'Install Truffle'
 
 - script: npx truffle compile
   displayName: 'Compile Contracts'
@@ -23,7 +21,36 @@ steps:
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: '**/TEST-*.xml'
-    failTaskOnFailedTests: true
     testRunTitle: 'Contract'
+    testResultsFormat: 'JUnit'
+    failTaskOnFailedTests: true
+    testResultsFiles: '**/TEST-*.xml'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: './test'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
+  displayName: Package tests    
+
+- script: npm install
+  displayName: 'Install client dependencies'
+  workingDirectory: $(System.DefaultWorkingDirectory)/client
+
+- script: npm run build
+  displayName: 'Build client'
+  workingDirectory: $(System.DefaultWorkingDirectory)/client  
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)/client/build'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/frontend'
+  displayName: Package front end  
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+    artifact: 'drop'
+    publishLocation: 'pipeline'
+  displayName: Publish artifacts
