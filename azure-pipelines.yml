@@ -10,16 +10,22 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+- task: NodeTool@0
+  displayName: 'Use Node.js 16.x'
+  inputs:
+    versionSpec: '16.x'
+
 - script: npm install
   displayName: 'Install Truffle'
 
 - script: npx truffle compile
-  displayName: 'Compile Contracts'
+  displayName: 'Compile contracts'
 
 - script: npx truffle test
-  displayName: 'Test Contracts'
+  displayName: 'Test contracts'
 
 - task: PublishTestResults@2
+  displayName: 'Publish test results'
   inputs:
     testRunTitle: 'Contract'
     testResultsFormat: 'JUnit'
@@ -27,11 +33,11 @@ steps:
     testResultsFiles: '**/TEST-*.xml'
 
 - task: CopyFiles@2
+  displayName: Package tests
   inputs:
     SourceFolder: './test'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
-  displayName: Package tests    
 
 - script: npm install
   displayName: 'Install client dependencies'
@@ -39,18 +45,18 @@ steps:
 
 - script: npm run build
   displayName: 'Build client'
-  workingDirectory: $(System.DefaultWorkingDirectory)/client  
+  workingDirectory: $(System.DefaultWorkingDirectory)/client
 
 - task: CopyFiles@2
+  displayName: Package front end
   inputs:
     SourceFolder: '$(System.DefaultWorkingDirectory)/client/build'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/frontend'
-  displayName: Package front end  
 
 - task: PublishPipelineArtifact@1
+  displayName: Publish artifacts
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)'
     artifact: 'drop'
     publishLocation: 'pipeline'
-  displayName: Publish artifacts

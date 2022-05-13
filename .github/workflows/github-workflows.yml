@@ -19,16 +19,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v3
+
+    - uses: actions/setup-node@v3
+      name: Use Node.js 16.x
       with:
         node-version: 16.x
         cache: 'npm'
+
     - run: npm install
+      name: 'Install Truffle'
+
     - run: npx truffle compile
+      name: 'Compile contracts'
+
     - run: npx truffle test
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v1
+      name: 'Test contracts'
+
+    - uses: EnricoMi/publish-unit-test-result-action@v1
+      name: Publish Unit Test Results
       if: success() || failure() 
       with:
         files: "TEST-results.xml"
