@@ -19,40 +19,40 @@ jobs:
       pull-requests: write
 
     steps:
-    - name: 'Checkout DarqueWarrior/TruffleSample'
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+      name: 'Checkout DarqueWarrior/TruffleSample'
 
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v3
+    - uses: actions/setup-node@v3
+      name: Use Node.js 16.x
       with:
         node-version: 16.x
         cache: 'npm'
 
-    - name: 'Install Truffle'
-      run: npm install
+    - run: npm install
+      name: 'Install Truffle'
 
-    - name: 'Compile contracts'
-      run: npx truffle compile
+    - run: npx truffle compile
+      name: 'Compile contracts'
 
-    - name: 'Test contracts'
-      run: npx truffle test
+    - run: npx truffle test
+      name: 'Test contracts'
 
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v1
+    - uses: EnricoMi/publish-unit-test-result-action@v1
+      name: Publish Unit Test Results
       if: success() || failure()
       with:
         files: "TEST-results.xml"
 
-    - name: 'Install client dependencies'
-      run: npm install
+    - run: npm install
+      name: 'Install client dependencies'
       working-directory: './client'
 
-    - name: 'Build client'
-      run: npm run build
+    - run: npm run build
+      name: 'Build client'
       working-directory: './client'
 
-    - name: Publish client
-      uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v2
+      name: Publish client
       with:
         name: client
-        path: "./client/build"      
+        path: "./client/build"

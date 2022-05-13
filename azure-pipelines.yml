@@ -10,52 +10,52 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- displayName: 'Use Node.js 16.x'
-  task: NodeTool@0
+- task: NodeTool@0
+  displayName: 'Use Node.js 16.x'
   inputs:
     versionSpec: '16.x'
 
-- displayName: 'Install Truffle'
-  script: npm install
-  
-- displayName: 'Compile contracts'
-  script: npx truffle compile
-  
-- displayName: 'Test contracts'
-  script: npx truffle test
-  
-- displayName: 'Publish test results'
-  task: PublishTestResults@2
+- script: npm install
+  displayName: 'Install Truffle'
+
+- script: npx truffle compile
+  displayName: 'Compile contracts'
+
+- script: npx truffle test
+  displayName: 'Test contracts'
+
+- task: PublishTestResults@2
+  displayName: 'Publish test results'
   inputs:
     testRunTitle: 'Contract'
     testResultsFormat: 'JUnit'
     failTaskOnFailedTests: true
     testResultsFiles: '**/TEST-*.xml'
 
-- displayName: Package tests
-  task: CopyFiles@2
+- task: CopyFiles@2
+  displayName: Package tests
   inputs:
     SourceFolder: './test'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/test'
 
-- displayName: Package package.json for tests
-  task: CopyFiles@2
+- task: CopyFiles@2
+  displayName: Package package.json for tests
   inputs:
     SourceFolder: '$(System.DefaultWorkingDirectory)'
     Contents: 'package.json'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'    
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
 
-- displayName: 'Install client dependencies'
-  script: npm install
+- script: npm install
+  displayName: 'Install client dependencies'
   workingDirectory: $(System.DefaultWorkingDirectory)/client
 
-- displayName: 'Build client'
-  script: npm run build
+- script: npm run build
+  displayName: 'Build client'
   workingDirectory: $(System.DefaultWorkingDirectory)/client
 
-- displayName: Publish client
-  task: PublishPipelineArtifact@1
+- task: PublishPipelineArtifact@1
+  displayName: Publish client
   inputs:
     targetPath: '$(System.DefaultWorkingDirectory)/client/build'
     artifact: 'client'
