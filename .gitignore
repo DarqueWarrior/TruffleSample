@@ -1,3 +1,4 @@
 # dependencies
 /node_modules
 TEST-results.xml
+client/.env

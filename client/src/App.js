@@ -1,3 +1,4 @@
+import process from 'process';
 import React, { Component } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
 import getWeb3 from "./getWeb3";
@@ -18,9 +19,18 @@ class App extends Component {
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
       const deployedNetwork = SimpleStorageContract.networks[networkId];
+
+      let contractAddress = deployedNetwork && deployedNetwork.address;
+
+      // If the network can't be found in the contract JSON look for an
+      // environment variable with the name of the id for the address.
+      if (!contractAddress) {
+        contractAddress = process.env.NetWork_1652504055985
+      }
+
       const instance = new web3.eth.Contract(
         SimpleStorageContract.abi,
-        deployedNetwork && deployedNetwork.address,
+        contractAddress,
       );
 
       // Set web3, accounts, and contract to the state, and then proceed with an
