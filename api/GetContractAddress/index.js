@@ -4,6 +4,8 @@ module.exports = async function (context, req) {
     // allows the code to be build once and deployed to each environment.
     context.log('GetContractAddress: JavaScript HTTP trigger function processed a request.');
     
+    context.log(`Returning: ${process.env.networkAddress}`)
+    
     // Return the address stored in the networkAddress environment variable.
     // This was set when this function was deployed. Before this function
     // is deployed the Smart Contract is migrated to the blockchain. The

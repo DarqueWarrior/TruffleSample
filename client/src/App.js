@@ -22,10 +22,13 @@ class App extends Component {
 
       let contractAddress = deployedNetwork && deployedNetwork.address;
 
-      // If the network can't be found in the contract JSON look for an
-      // environment variable with the name of the id for the address.
+      // If the network can't be found in the contract JSON call the 
+      // backend API for the address.
       if (!contractAddress) {
-        contractAddress = process.env.NetWork_1652504055985
+        console.log('Address not found in contract JSON. Calling backup api');
+        const text = await(await fetch(`/api/GetContractAddress`)).text();
+        console.log(`API returned: ${text}`);
+        contractAddress = text;
       }
 
       const instance = new web3.eth.Contract(
