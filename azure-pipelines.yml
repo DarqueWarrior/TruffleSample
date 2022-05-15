@@ -10,7 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 jobs:
-- job: Build:
+- job: Build
   steps:
   - task: NodeTool@0
     displayName: 'Use Node.js 16.x'
