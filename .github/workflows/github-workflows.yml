@@ -43,6 +43,30 @@ jobs:
       with:
         files: 'TEST-results.xml'
         check_name: Contract test results
+  
+    - run: |
+        mkdir -p staging/tests
+        cp package.json ./staging/tests/
+        cp -r test/ ./staging/tests/
+      name: 'Package tests'
+    
+    - uses: actions/upload-artifact@v2
+      name: Publish client
+      with:
+        name: tests
+        path: './staging/tests'
+
+    - run: |
+        mkdir -p staging/contracts
+        cp truffle-config.js ./staging/contracts/
+        cp -r test/ ./client/src/contracts/
+      name: 'Package contracts'
+    
+    - uses: actions/upload-artifact@v2
+      name: Publish contracts
+      with:
+        name: contracts
+        path: './staging/contracts'
 
     - run: npm install
       name: 'Install client dependencies'
