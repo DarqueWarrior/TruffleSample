@@ -59,8 +59,7 @@ jobs:
       name: Publish client test results
       if: success() || failure()
       with:
-        files: 'junit.xml'
-      working-directory: './client'
+        files: '**/junit.xml'
 
     - uses: actions/upload-artifact@v2
       name: Publish client
