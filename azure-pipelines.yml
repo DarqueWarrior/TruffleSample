@@ -54,6 +54,10 @@ steps:
   displayName: 'Build client'
   workingDirectory: $(System.DefaultWorkingDirectory)/client
 
+- script: CI=true npm test -- --coverage
+  displayName: 'Test client'
+  workingDirectory: $(System.DefaultWorkingDirectory)/client  
+
 - task: PublishPipelineArtifact@1
   displayName: Publish client
   inputs:

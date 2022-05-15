@@ -41,7 +41,7 @@ jobs:
       name: Publish Unit Test Results
       if: success() || failure()
       with:
-        files: "TEST-results.xml"
+        files: 'TEST-results.xml'
 
     - run: npm install
       name: 'Install client dependencies'
@@ -51,8 +51,12 @@ jobs:
       name: 'Build client'
       working-directory: './client'
 
+    - run: CI=true npm test -- --coverage
+      name: 'Test client'
+      working-directory: './client'
+
     - uses: actions/upload-artifact@v2
       name: Publish client
       with:
         name: client
-        path: "./client/build"
+        path: './client/build'
