@@ -9,54 +9,84 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: NodeTool@0
-  displayName: 'Use Node.js 16.x'
-  inputs:
-    versionSpec: '16.x'
+jobs:
+- job: Build
+  steps:
+  - task: NodeTool@0
+    displayName: 'Use Node.js 16.x'
+    inputs:
+      versionSpec: '16.x'
 
-- script: npm install
-  displayName: 'Install Truffle'
+  - script: npm install
+    displayName: 'Install Truffle'
 
-- script: npx truffle compile
-  displayName: 'Compile contracts'
+  - script: npx truffle compile
+    displayName: 'Compile contracts'
 
-- script: npx truffle test
-  displayName: 'Test contracts'
+  - script: npx truffle test
+    displayName: 'Test contracts'
 
-- task: PublishTestResults@2
-  displayName: 'Publish test results'
-  inputs:
-    testRunTitle: 'Contract'
-    testResultsFormat: 'JUnit'
-    failTaskOnFailedTests: true
-    testResultsFiles: '**/TEST-*.xml'
+  - task: PublishTestResults@2
+    displayName: 'Publish contract test results'
+    inputs:
+      testRunTitle: 'Contract'
+      testResultsFormat: 'JUnit'
+      failTaskOnFailedTests: true
+      testResultsFiles: '**/TEST-*.xml'
 
-- task: CopyFiles@2
-  displayName: Package tests
-  inputs:
-    SourceFolder: './test'
-    Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
+  - task: CopyFiles@2
+    displayName: Package tests
+    inputs:
+      Contents: |
+        $(System.DefaultWorkingDirectory)/test/**
+        package.json
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
 
-- script: npm install
-  displayName: 'Install client dependencies'
-  workingDirectory: $(System.DefaultWorkingDirectory)/client
+  - task: PublishPipelineArtifact@1
+    displayName: Publish tests
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/tests'
+      artifact: 'tests'
+      publishLocation: 'pipeline'
 
-- script: npm run build
-  displayName: 'Build client'
-  workingDirectory: $(System.DefaultWorkingDirectory)/client
+  - task: CopyFiles@2
+    displayName: Package contracts
+    inputs:
+      Contents: |
+        $(System.DefaultWorkingDirectory)/truffle-config.js
+        $(System.DefaultWorkingDirectory)/client/src/contracts/**
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/contracts'
 
-- task: CopyFiles@2
-  displayName: Package front end
-  inputs:
-    SourceFolder: '$(System.DefaultWorkingDirectory)/client/build'
-    Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/frontend'
+  - task: PublishPipelineArtifact@1
+    displayName: Publish contracts
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/contracts'
+      artifact: 'contracts'
+      publishLocation: 'pipeline'
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish artifacts
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
-    artifact: 'drop'
-    publishLocation: 'pipeline'
+  - script: npm install
+    displayName: 'Install client dependencies'
+    workingDirectory: $(System.DefaultWorkingDirectory)/client
+
+  - script: npm run build
+    displayName: 'Build client'
+    workingDirectory: $(System.DefaultWorkingDirectory)/client
+
+  - script: CI=true npm test -- --reporters=default --reporters=jest-junit
+    displayName: 'Test client'
+    workingDirectory: $(System.DefaultWorkingDirectory)/client
+
+  - task: PublishTestResults@2
+    displayName: 'Publish client test results'
+    inputs:
+      testRunTitle: 'Client'
+      testResultsFormat: 'JUnit'
+      failTaskOnFailedTests: true
+      testResultsFiles: '**/junit*.xml'
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish client
+    inputs:
+      targetPath: '$(System.DefaultWorkingDirectory)/client/build'
+      artifact: 'client'
+      publishLocation: 'pipeline'

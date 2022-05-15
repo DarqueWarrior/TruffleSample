@@ -1,0 +1,33 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.222.0/containers/ubuntu
+{
+	"name": "Web3",
+	"image": "darquewarrior/ethereum:0.1.2",
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"juanblanco.solidity",
+		"hosho.solidity-debugger",
+		"msjsdiag.vscode-react-native",
+		"ms-azuretools.vscode-docker",
+		"tintinweb.vscode-vyper",
+		"trufflesuite-csi.truffle-vscode"
+	],
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [
+		3000,
+		8545
+	],
+	// add labels
+	"portsAttributes": {
+		"3000": {
+			"label": "react"
+		},
+		"8545": {
+			"label": "ganache"
+		}
+	},
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode"
+}
