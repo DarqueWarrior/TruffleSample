@@ -37,6 +37,13 @@ steps:
   inputs:
     SourceFolder: './test'
     Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/test'
+
+- task: CopyFiles@2
+  displayName: Package package.json for tests
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)'
+    Contents: 'package.json'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
 
 - script: npm install
@@ -47,16 +54,9 @@ steps:
   displayName: 'Build client'
   workingDirectory: $(System.DefaultWorkingDirectory)/client
 
-- task: CopyFiles@2
-  displayName: Package front end
-  inputs:
-    SourceFolder: '$(System.DefaultWorkingDirectory)/client/build'
-    Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/frontend'
-
 - task: PublishPipelineArtifact@1
-  displayName: Publish artifacts
+  displayName: Publish client
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
-    artifact: 'drop'
+    targetPath: '$(System.DefaultWorkingDirectory)/client/build'
+    artifact: 'client'
     publishLocation: 'pipeline'
