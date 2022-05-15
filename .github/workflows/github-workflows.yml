@@ -42,6 +42,7 @@ jobs:
       if: success() || failure()
       with:
         files: 'TEST-results.xml'
+        check_name: Contract test results
 
     - run: npm install
       name: 'Install client dependencies'
@@ -60,6 +61,7 @@ jobs:
       if: success() || failure()
       with:
         files: '**/junit.xml'
+        check_name: Client test results
 
     - uses: actions/upload-artifact@v2
       name: Publish client
