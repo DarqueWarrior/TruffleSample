@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  Build:
 
     runs-on: ubuntu-latest
 
@@ -42,7 +42,7 @@ jobs:
       if: success() || failure()
       with:
         files: 'TEST-results.xml'
-        check_name: Contract test results
+        check_name: Contract
   
     - run: |
         mkdir -p staging/tests
@@ -85,7 +85,7 @@ jobs:
       if: success() || failure()
       with:
         files: '**/junit.xml'
-        check_name: Client test results
+        check_name: Client
 
     - uses: actions/upload-artifact@v2
       name: Publish client
