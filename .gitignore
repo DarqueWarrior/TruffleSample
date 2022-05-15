@@ -2,3 +2,4 @@
 /node_modules
 TEST-results.xml
 client/.env
+client/junit.xml

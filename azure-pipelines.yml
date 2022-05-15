@@ -25,7 +25,7 @@ steps:
   displayName: 'Test contracts'
 
 - task: PublishTestResults@2
-  displayName: 'Publish test results'
+  displayName: 'Publish contract test results'
   inputs:
     testRunTitle: 'Contract'
     testResultsFormat: 'JUnit'
@@ -54,9 +54,17 @@ steps:
   displayName: 'Build client'
   workingDirectory: $(System.DefaultWorkingDirectory)/client
 
-- script: npm test -- --coverage
+- script: npm test -- --reporters=default --reporters=jest-junit
   displayName: 'Test client'
-  workingDirectory: $(System.DefaultWorkingDirectory)/client  
+  workingDirectory: $(System.DefaultWorkingDirectory)/client
+
+- task: PublishTestResults@2
+  displayName: 'Publish client test results'
+  inputs:
+    testRunTitle: 'Client'
+    testResultsFormat: 'JUnit'
+    failTaskOnFailedTests: true
+    testResultsFiles: '**/junit*.xml'
 
 - task: PublishPipelineArtifact@1
   displayName: Publish client

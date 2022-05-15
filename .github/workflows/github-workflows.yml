@@ -38,7 +38,7 @@ jobs:
       name: 'Test contracts'
 
     - uses: EnricoMi/publish-unit-test-result-action@v1
-      name: Publish Unit Test Results
+      name: Publish contract test results
       if: success() || failure()
       with:
         files: 'TEST-results.xml'
@@ -51,9 +51,15 @@ jobs:
       name: 'Build client'
       working-directory: './client'
 
-    - run: npm test -- --coverage
+    - run: npm test -- --reporters=default --reporters=jest-junit
       name: 'Test client'
       working-directory: './client'
+
+    - uses: EnricoMi/publish-unit-test-result-action@v1
+      name: Publish client test results
+      if: success() || failure()
+      with:
+        files: 'junit.xml'
 
     - uses: actions/upload-artifact@v2
       name: Publish client
