@@ -36,7 +36,7 @@ steps:
   displayName: Package tests
   inputs:
     Contents: |
-      ./test/'**'
+      $(Build.ArtifactStagingDirectory)/test/**
       package.json
     TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
 
@@ -46,20 +46,6 @@ steps:
     targetPath: '$(Build.ArtifactStagingDirectory)/tests'
     artifact: 'tests'
     publishLocation: 'pipeline'
-
-# - task: CopyFiles@2
-#   displayName: Package tests
-#   inputs:
-#     SourceFolder: './test'
-#     Contents: '**'
-#     TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/test'
-
-# - task: CopyFiles@2
-#   displayName: Package package.json for tests
-#   inputs:
-#     SourceFolder: '$(System.DefaultWorkingDirectory)'
-#     Contents: 'package.json'
-#     TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
 
 - task: CopyFiles@2
   displayName: Package contracts
