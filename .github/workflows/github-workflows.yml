@@ -51,7 +51,7 @@ jobs:
       name: 'Build client'
       working-directory: './client'
 
-    - run: CI=true npm test -- --coverage
+    - run: npm test -- --coverage
       name: 'Test client'
       working-directory: './client'
 
