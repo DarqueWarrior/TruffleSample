@@ -60,6 +60,7 @@ jobs:
       if: success() || failure()
       with:
         files: 'junit.xml'
+      working-directory: './client'
 
     - uses: actions/upload-artifact@v2
       name: Publish client
