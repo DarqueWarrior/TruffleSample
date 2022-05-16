@@ -125,11 +125,11 @@ stages:
 
     - script: npm install
       displayName: 'Install Truffle'
-      workingDirectory: ./contracts
+      workingDirectory: $(Agent.BuildDirectory)/contracts
 
     - script: 'npx truffle migrate --network rinkeby --reset --compile-all'
       displayName: Deploy contracts
-      workingDirectory: ./contracts
+      workingDirectory: $(Agent.BuildDirectory)/contracts
       env:
         NEMONIC: $(NEMONIC)
         INFURA_PROJECT_ID: $(INFURA_PROJECT_ID)
@@ -146,7 +146,7 @@ stages:
         $address = $contract.networks.$networkId.address
 
         Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
-      workingDirectory: ./contracts
+      workingDirectory: $(Agent.BuildDirectory)/contracts
 
     - task: AzureCLI@2
       name: deploy
@@ -155,9 +155,9 @@ stages:
         azureSubscription: 'ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)'
         scriptType: 'pscore'
         scriptLocation: 'scriptPath'
-        scriptPath: './iac/deploy.ps1'
+        scriptPath: '$(Agent.BuildDirectory)/iac/deploy.ps1'
         arguments: '-repoUrl $(Build.Repository.Uri) -verbose'
-        workingDirectory: './iac'
+        workingDirectory: '$(Agent.BuildDirectory)/iac'
 
 - stage: QA
   dependsOn: Dev
