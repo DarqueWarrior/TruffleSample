@@ -146,6 +146,7 @@ stages:
         $address = $contract.networks.$networkId.address
 
         Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
+      displayName: Find contract address
       workingDirectory: $(Agent.BuildDirectory)/contracts
 
     - task: AzureCLI@2

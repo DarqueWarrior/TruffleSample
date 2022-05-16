@@ -10,6 +10,15 @@ module.exports = {
       port: 8545,
       network_id: '*'
     },
+    rinkeby: {
+      host: "localhost",
+      provider: function () {
+        return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/" + projectId);
+      },
+      network_id: 4,
+      gas: 6700000,
+      gasPrice: 10000000000
+    },
     develop: {
       port: 8545
     }
