@@ -97,7 +97,7 @@ stages:
     - task: CopyFiles@2
       displayName: Package IaC
       inputs:
-        Contents: $(System.DefaultWorkingDirectory)/iac/**
+        Contents: $(System.DefaultWorkingDirectory)/iac
         TargetFolder: '$(Build.ArtifactStagingDirectory)/iac'
 
     - task: PublishPipelineArtifact@1
