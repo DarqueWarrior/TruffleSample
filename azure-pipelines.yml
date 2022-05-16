@@ -125,11 +125,11 @@ stages:
 
     - script: npm install
       displayName: 'Install Truffle'
-      workingDirectory: $(System.DefaultWorkingDirectory)/contracts
+      workingDirectory: ./contracts
 
     - script: 'npx truffle migrate --network rinkeby --reset --compile-all'
       displayName: Deploy contracts
-      workingDirectory: $(System.DefaultWorkingDirectory)/contracts
+      workingDirectory: ./contracts
       env:
         NEMONIC: $(NEMONIC)
         INFURA_PROJECT_ID: $(INFURA_PROJECT_ID)
@@ -146,7 +146,7 @@ stages:
         $address = $contract.networks.$networkId.address
 
         Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
-      workingDirectory: $(System.DefaultWorkingDirectory)/contracts
+      workingDirectory: ./contracts
 
     - task: AzureCLI@2
       name: deploy
