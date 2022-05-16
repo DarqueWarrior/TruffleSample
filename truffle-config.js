@@ -1,5 +1,10 @@
 const path = require("path");
 
+require('dotenv').config();
+var mnemonic = process.env["NEMONIC"];
+var projectId = process.env["INFURA_PROJECT_ID"];
+var HDWalletProvider = require("truffle-hdwallet-provider");
+
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // to customize your Truffle configuration!
