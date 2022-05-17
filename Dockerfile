@@ -1,4 +1,4 @@
-FROM node:16.15.0-slim
+FROM node:16-alpine
 
 RUN apk add --no-cache --virtual .pipeline-deps readline linux-pam \
   && apk add bash sudo shadow \
