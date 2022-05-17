@@ -17,11 +17,6 @@ stages:
     container: darquewarrior/ethereum:0.1.4
 
     steps:
-    # - task: NodeTool@0
-    #   displayName: 'Use Node.js 16.x'
-    #   inputs:
-    #     versionSpec: '16.x'
-
     - script: npm install
       displayName: 'Install Truffle'
 
@@ -114,17 +109,15 @@ stages:
   dependsOn: Build
   jobs:
   - job: IaC
+
+    container: darquewarrior/ethereum:0.1.4
+
     steps:
     - checkout: none
     - download: none
 
     - task: DownloadPipelineArtifact@2
       displayName: Download artifacts
-
-    - task: NodeTool@0
-      displayName: 'Use Node.js 16.x'
-      inputs:
-        versionSpec: '16.x'
 
     - script: npm install
       displayName: 'Install Truffle'
