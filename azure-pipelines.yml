@@ -141,7 +141,7 @@ stages:
         # Get the address property
         $address = $contract.networks.$networkId.address
 
-        Write-Host $address
+        Write-Host "##[section]$address"
 
         Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
       displayName: Find contract address
