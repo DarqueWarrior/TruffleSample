@@ -9,18 +9,20 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+container: darquewarrior/ethereum:0.1.3
+
 stages:
 - stage: Build
   jobs:
   - job: Compile
     steps:
-    - task: NodeTool@0
-      displayName: 'Use Node.js 16.x'
-      inputs:
-        versionSpec: '16.x'
+    # - task: NodeTool@0
+    #   displayName: 'Use Node.js 16.x'
+    #   inputs:
+    #     versionSpec: '16.x'
 
-    - script: npm install
-      displayName: 'Install Truffle'
+    # - script: npm install
+    #   displayName: 'Install Truffle'
 
     - script: npx truffle compile
       displayName: 'Compile contracts'
