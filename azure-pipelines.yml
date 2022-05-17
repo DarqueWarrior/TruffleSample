@@ -127,7 +127,7 @@ stages:
       displayName: 'Install Truffle'
       workingDirectory: $(Agent.BuildDirectory)/contracts
 
-    - script: 'npx truffle migrate --network rinkeby --reset --compile-all'
+    - script: 'npx truffle migrate --network rinkeby --reset'
       displayName: Deploy contracts
       workingDirectory: $(Agent.BuildDirectory)/contracts
       env:
@@ -144,6 +144,8 @@ stages:
 
         # Get the address property
         $address = $contract.networks.$networkId.address
+
+        Write-Host $address
 
         Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
       displayName: Find contract address
