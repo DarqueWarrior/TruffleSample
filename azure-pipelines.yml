@@ -54,6 +54,7 @@ stages:
       inputs:
         Contents: |
           $(System.DefaultWorkingDirectory)/package.json
+          $(System.DefaultWorkingDirectory)/migrations/**
           $(System.DefaultWorkingDirectory)/truffle-config.js
           $(System.DefaultWorkingDirectory)/client/src/contracts/**
         TargetFolder: '$(Build.ArtifactStagingDirectory)/contracts'
@@ -123,7 +124,7 @@ stages:
       displayName: 'Install Truffle'
       workingDirectory: $(Agent.BuildDirectory)/contracts
 
-    - script: 'npx truffle migrate --network rinkeby --reset'
+    - script: 'npx truffle migrate --network rinkeby --reset --compile-none'
       displayName: Deploy contracts
       workingDirectory: $(Agent.BuildDirectory)/contracts
       env:
