@@ -22,8 +22,8 @@ stages:
     #   inputs:
     #     versionSpec: '16.x'
 
-    # - script: npm install
-    #   displayName: 'Install Truffle'
+    - script: npm install
+      displayName: 'Install Truffle'
 
     - script: npx truffle compile
       displayName: 'Compile contracts'
