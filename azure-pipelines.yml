@@ -14,7 +14,7 @@ stages:
   jobs:
   - job: Compile
   
-    container: darquewarrior/trufflebuild:0.1.0
+    container: darquewarrior/ethereum:0.1.4
 
     steps:
     # - task: NodeTool@0
