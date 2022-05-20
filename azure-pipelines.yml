@@ -194,6 +194,8 @@ stages:
         deployment_environment: dev
         workingDirectory: $(Pipeline.Workspace)
         azure_static_web_apps_api_token: $(deploymentToken)
+      env:
+        networkAddress: $(contractAddress)
 
 - stage: QA
   dependsOn: Dev
