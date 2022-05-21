@@ -154,6 +154,7 @@ stages:
                 Write-Host "##vso[task.logissue type=error]Address not found"
               }
 
+              Write-Host "##vso[task.setvariable variable=networkId;isOutput=true]$networkId"
               Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
             displayName: Find contract address
             name: contract
@@ -167,13 +168,15 @@ stages:
               scriptType: "pscore"
               scriptLocation: "scriptPath"
               scriptPath: "$(Agent.BuildDirectory)/iac/deploy.ps1"
-              arguments: "-repoUrl $(Build.Repository.Uri) -verbose"
+              arguments: "-repoUrl $(Build.Repository.Uri) -rgName TruffleSample_dev -verbose"
               workingDirectory: "$(Agent.BuildDirectory)/iac"
 
       - job: Deploy
         dependsOn: IaC
         variables:
           # map the output variable from build stage into this job
+          swaName: $[ dependencies.IaC.outputs['deploy.swaName'] ]
+          networkId: $[ dependencies.IaC.outputs['contract.networkId'] ]
           deploymentToken: $[ dependencies.IaC.outputs['deploy.deploymentToken'] ]
           contractAddress: $[ dependencies.IaC.outputs['contract.contractAddress'] ]
 
@@ -185,22 +188,29 @@ stages:
             displayName: Download artifacts
 
           - task: AzureStaticWebApp@0
-            displayName: Deploy Frontend
+            displayName: Deploy frontend
             inputs:
               api_location: api
               app_location: client
               skip_app_build: true
-              deployment_environment: dev
               workingDirectory: $(Pipeline.Workspace)
               azure_static_web_apps_api_token: $(deploymentToken)
-
-          - task: AzurePowerShell@5
+          
+          - task: AzureCLI@2
             inputs:
               azureSubscription: 'ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)'
-              ScriptType: 'InlineScript'
-              Inline: 'New-AzStaticWebAppBuildAppSetting -EnvironmentName dev -Name swa6yprdn2ccalam -ResourceGroupName swa_demo -AppSetting @{"networkAddress"="$(contractAddress)"}'
-              azurePowerShellVersion: 'LatestVersion'
-              pwsh: true
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: 'az staticwebapp appsettings set --name $(swaName) --setting-names networkAddress=$(contractAddress) networkAddress_$(networkId)=$(contractAddress)'
+
+          # - task: AzurePowerShell@5
+          #   displayName: Configure API
+          #   inputs:
+          #     azureSubscription: 'ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)'
+          #     ScriptType: 'InlineScript'
+          #     Inline: 'New-AzStaticWebAppBuildAppSetting -EnvironmentName default -Name $(swaName) -ResourceGroupName $(resourceGroup) -AppSetting @{"networkAddress"="$(contractAddress)"}'
+          #     azurePowerShellVersion: 'LatestVersion'
+          #     pwsh: true
 
 
   - stage: QA

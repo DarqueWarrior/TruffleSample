@@ -36,4 +36,6 @@ $deploymentToken = $deployment.properties.outputs.deploymentToken.value
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/expressions?view=azure-devops#dependencies
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#share-variables-across-pipelines
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/expressions?view=azure-devops#dependencies
+Write-Host "##vso[task.setvariable variable=swaName;isOutput=true]$rgName"
+Write-Host "##vso[task.setvariable variable=resourceGroup;isOutput=true]$rgName"
 Write-Host "##vso[task.setvariable variable=deploymentToken;isOutput=true]$deploymentToken"
