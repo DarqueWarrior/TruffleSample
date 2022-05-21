@@ -93,6 +93,8 @@ stages:
           - script: CI=true npm test -- --reporters=default --reporters=jest-junit
             displayName: "Test API"
             workingDirectory: $(System.DefaultWorkingDirectory)/api
+            env:
+              networkId_4: '0x7a063c7e4A0EC2fB4dC0F73103Fd45F17b46Ae52'
 
           - task: PublishTestResults@2
             displayName: "Publish API test results"
