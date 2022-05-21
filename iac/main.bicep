@@ -20,4 +20,5 @@ module web3swa './swa.bicep' = {
   }
 }
 
+output swaName string = web3swa.outputs.swaName
 output deploymentToken string = web3swa.outputs.deploymentToken

@@ -30,12 +30,13 @@ $deployment = $(az deployment sub create --name $rgName `
                 --output json) | ConvertFrom-Json
 
 # Store the outputs from the deployment
+$swaName = $deployment.properties.outputs.swaName.value
 $deploymentToken = $deployment.properties.outputs.deploymentToken.value
 
 # Write the values as output so they can be used in other stages.
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/expressions?view=azure-devops#dependencies
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#share-variables-across-pipelines
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/expressions?view=azure-devops#dependencies
-Write-Host "##vso[task.setvariable variable=swaName;isOutput=true]$rgName"
+Write-Host "##vso[task.setvariable variable=swaName;isOutput=true]$swaName"
 Write-Host "##vso[task.setvariable variable=resourceGroup;isOutput=true]$rgName"
 Write-Host "##vso[task.setvariable variable=deploymentToken;isOutput=true]$deploymentToken"

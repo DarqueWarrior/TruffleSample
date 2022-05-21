@@ -24,4 +24,5 @@ resource swa 'Microsoft.Web/staticSites@2021-03-01' = {
   }
 }
 
+output swaName string = swa.name
 output deploymentToken string = swa.listSecrets().properties.apiKey
