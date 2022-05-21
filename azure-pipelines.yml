@@ -224,7 +224,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: "az staticwebapp appsettings set --name $(swaName) --setting-names networkAddress=$(contractAddress) networkAddress_$(networkId)=$(contractAddress)"
 
-  - stage: manual_validation
+  - stage: dev_validation
     displayName: Dev Validation
     variables:
       # map the output variable from A into this job
@@ -247,7 +247,7 @@ stages:
               onTimeout: "reject"
 
   - stage: QA
-    dependsOn: Dev
+    dependsOn: dev_validation
     jobs:
       - job: Deploy
         variables:
