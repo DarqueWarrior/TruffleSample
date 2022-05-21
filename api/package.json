@@ -4,8 +4,11 @@
   "description": "",
   "scripts": {
     "start": "func start",
-    "test": "echo \"No tests yet...\""
+    "test": "jest"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "dotenv": "^16.0.1",
+    "jest": "^28.1.0",
+    "jest-junit": "^13.2.0"
+  }
 }

@@ -25,7 +25,7 @@ class App extends Component {
       // backend API for the address.
       if (!contractAddress) {
         console.log('Address not found in contract JSON. Calling backup api');
-        const text = await(await fetch(`/api/GetContractAddress`)).text();
+        const text = await (await fetch(`/api/GetContractAddress/?networkId${networkId}`)).text();
         console.log(`API returned: ${text}`);
         contractAddress = text;
       }

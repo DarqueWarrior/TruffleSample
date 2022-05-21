@@ -84,7 +84,23 @@ stages:
               testRunTitle: "Client"
               testResultsFormat: "JUnit"
               failTaskOnFailedTests: true
-              testResultsFiles: "**/junit*.xml"
+              testResultsFiles: "client/junit*.xml"
+
+          - script: npm install
+            displayName: "Install API dependencies"
+            workingDirectory: $(System.DefaultWorkingDirectory)/api
+
+          - script: CI=true npm test -- --reporters=default --reporters=jest-junit
+            displayName: "Test API"
+            workingDirectory: $(System.DefaultWorkingDirectory)/api
+
+          - task: PublishTestResults@2
+            displayName: "Publish API test results"
+            inputs:
+              testRunTitle: "API"
+              testResultsFormat: "JUnit"
+              failTaskOnFailedTests: true
+              testResultsFiles: "api/junit*.xml"
 
           - task: PublishPipelineArtifact@1
             displayName: Publish client
@@ -195,7 +211,7 @@ stages:
               skip_app_build: true
               workingDirectory: $(Pipeline.Workspace)
               azure_static_web_apps_api_token: $(deploymentToken)
-          
+
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)'
