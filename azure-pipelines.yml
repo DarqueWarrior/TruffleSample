@@ -257,6 +257,28 @@ stages:
         steps:
           - script: echo QA
 
+  - stage: qa_validation
+    displayName: QA Validation
+    variables:
+      # map the output variable from A into this job
+      swa_url: $[ stageDependencies.QA.Deploy.outputs['AzureStaticWebApp.static_web_app_url'] ]
+    jobs:
+      - job: waitForValidation
+        displayName: Wait for external validation
+        pool: server
+        timeoutInMinutes: 1440 # job times out in 1 day
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 1440 # task times out in 1 day
+            inputs:
+              notifyUsers: |
+                $(Build.RequestedForEmail)
+              instructions: |
+                Please validate the recent changes to your dApp and click resume.
+
+                $(swa_url)
+              onTimeout: "reject"
+
   - stage: Prod
     dependsOn: QA
     jobs:

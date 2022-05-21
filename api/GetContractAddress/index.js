@@ -13,7 +13,7 @@ module.exports = async function (context, req) {
         return;
     }
 
-    const address = process.env[`networkId_${networkId}`]
+    const address = process.env[`networkAddress_${networkId}`]
 
     context.log(`Returning: ${address}`)
 
