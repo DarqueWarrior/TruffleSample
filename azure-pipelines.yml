@@ -280,7 +280,7 @@ stages:
               onTimeout: "reject"
 
   - stage: Prod
-    dependsOn: QA
+    dependsOn: qa_validation
     jobs:
       - job: Deploy
         steps:
