@@ -188,7 +188,7 @@ stages:
               scriptType: "pscore"
               scriptLocation: "scriptPath"
               scriptPath: "$(Agent.BuildDirectory)/iac/deploy.ps1"
-              arguments: "-repoUrl $(Build.Repository.Uri) -rgName TruffleSample_dev -verbose"
+              arguments: "-repoUrl $(Build.Repository.Uri) -rgName TruffleSample_dev -deployGanache -verbose"
               workingDirectory: "$(Agent.BuildDirectory)/iac"
 
       - job: Deploy

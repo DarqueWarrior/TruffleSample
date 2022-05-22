@@ -15,7 +15,10 @@ param (
         $location = "centralus",
         
         [string]
-        $repoUrl
+        $repoUrl,
+
+        [switch]
+        $deployGanache
 )
 
 Write-Verbose $repoUrl
@@ -27,11 +30,17 @@ $deployment = $(az deployment sub create --name $rgName `
                 --parameters location=$location `
                 --parameters rgName=$rgName `
                 --parameters repoUrl=$repoUrl `
+                --parameters deployGanache=$deployGanache.IsPresent `
                 --output json) | ConvertFrom-Json
 
 # Store the outputs from the deployment
 $swaName = $deployment.properties.outputs.swaName.value
 $deploymentToken = $deployment.properties.outputs.deploymentToken.value
+
+if ($deployGanache.IsPresent) {
+        $ganacheIp = $deployment.properties.outputs.ganacheIp.value
+        Write-Host "##vso[task.setvariable variable=ganacheIp;isOutput=true]$ganacheIp"
+}
 
 # Write the values as output so they can be used in other stages.
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/expressions?view=azure-devops#dependencies

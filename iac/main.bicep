@@ -1,6 +1,7 @@
 targetScope = 'subscription'
 
 param repoUrl string
+param deployGanache bool = false
 param swaName string = 'web3swa'
 param location string = 'centralus'
 param rgName string = 'truffle_demo'
@@ -8,6 +9,14 @@ param rgName string = 'truffle_demo'
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: rgName
   location: location
+}
+
+module ganache './ganache.bicep' = if (deployGanache) {
+  name: 'ganache'
+  scope: resourceGroup(rg.name)
+  params: {
+    location: location
+  }
 }
 
 module web3swa './swa.bicep' = {
@@ -22,3 +31,4 @@ module web3swa './swa.bicep' = {
 
 output swaName string = web3swa.outputs.swaName
 output deploymentToken string = web3swa.outputs.deploymentToken
+output ganacheIp string = (deployGanache) ? ganache.outputs.ganacheIp : '127.0.0.1'
