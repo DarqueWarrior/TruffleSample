@@ -159,12 +159,6 @@ stages:
         displayName: Deploy Contracts
         dependsOn: IaC
         container: darquewarrior/ethereum:0.1.4
-        variables:
-          # map the output variable from build stage into this job
-          swaName: $[ dependencies.IaC.outputs['deploy.swaName'] ]
-          networkId: $[ dependencies.IaC.outputs['contract.networkId'] ]
-          deploymentToken: $[ dependencies.IaC.outputs['deploy.deploymentToken'] ]
-          contractAddress: $[ dependencies.IaC.outputs['contract.contractAddress'] ]
 
         steps:
           - checkout: none
@@ -209,13 +203,15 @@ stages:
 
       - job: Deploy_Frontend
         displayName: Deploy Frontend
-        dependsOn: Deploy_Contracts
+        dependsOn: 
+          IaC
+          Deploy_Contracts
         variables:
           # map the output variable from build stage into this job
           swaName: $[ dependencies.IaC.outputs['deploy.swaName'] ]
-          networkId: $[ dependencies.IaC.outputs['contract.networkId'] ]
           deploymentToken: $[ dependencies.IaC.outputs['deploy.deploymentToken'] ]
-          contractAddress: $[ dependencies.IaC.outputs['contract.contractAddress'] ]
+          networkId: $[ dependencies.Deploy_Contracts.outputs['contract.networkId'] ]
+          contractAddress: $[ dependencies.Deploy_Contracts.outputs['contract.contractAddress'] ]
 
         steps:
           - checkout: none
