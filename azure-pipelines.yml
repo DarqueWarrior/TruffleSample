@@ -137,7 +137,33 @@ stages:
     dependsOn: Build
     jobs:
       - job: IaC
+        steps:
+          - checkout: none
+          - download: none
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download artifacts
+
+          - task: AzureCLI@2
+            name: deploy
+            displayName: Deploy SWA
+            inputs:
+              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
+              scriptType: "pscore"
+              scriptLocation: "scriptPath"
+              scriptPath: "$(Agent.BuildDirectory)/iac/deploy.ps1"
+              arguments: "-repoUrl $(Build.Repository.Uri) -rgName TruffleSample_dev -deployGanache -verbose"
+              workingDirectory: "$(Agent.BuildDirectory)/iac"
+
+      - job: Deploy
+        dependsOn: IaC
         container: darquewarrior/ethereum:0.1.4
+        variables:
+          # map the output variable from build stage into this job
+          swaName: $[ dependencies.IaC.outputs['deploy.swaName'] ]
+          networkId: $[ dependencies.IaC.outputs['contract.networkId'] ]
+          deploymentToken: $[ dependencies.IaC.outputs['deploy.deploymentToken'] ]
+          contractAddress: $[ dependencies.IaC.outputs['contract.contractAddress'] ]
 
         steps:
           - checkout: none
@@ -180,33 +206,6 @@ stages:
             name: contract
             workingDirectory: $(Agent.BuildDirectory)/contracts
 
-          - task: AzureCLI@2
-            name: deploy
-            displayName: Deploy SWA
-            inputs:
-              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
-              scriptType: "pscore"
-              scriptLocation: "scriptPath"
-              scriptPath: "$(Agent.BuildDirectory)/iac/deploy.ps1"
-              arguments: "-repoUrl $(Build.Repository.Uri) -rgName TruffleSample_dev -deployGanache -verbose"
-              workingDirectory: "$(Agent.BuildDirectory)/iac"
-
-      - job: Deploy
-        dependsOn: IaC
-        variables:
-          # map the output variable from build stage into this job
-          swaName: $[ dependencies.IaC.outputs['deploy.swaName'] ]
-          networkId: $[ dependencies.IaC.outputs['contract.networkId'] ]
-          deploymentToken: $[ dependencies.IaC.outputs['deploy.deploymentToken'] ]
-          contractAddress: $[ dependencies.IaC.outputs['contract.contractAddress'] ]
-
-        steps:
-          - checkout: none
-          - download: none
-
-          - task: DownloadPipelineArtifact@2
-            displayName: Download artifacts
-
           - task: AzureStaticWebApp@0
             displayName: Deploy frontend
             inputs:
@@ -228,6 +227,7 @@ stages:
     displayName: Dev Validation
     variables:
       # map the output variable from A into this job
+      resourceGroup: $[ dependencies.IaC.outputs['deploy.resourceGroup'] ]
       swa_url: $[ stageDependencies.Dev.Deploy.outputs['AzureStaticWebApp.static_web_app_url'] ]
     jobs:
       - job: waitForValidation
@@ -245,6 +245,13 @@ stages:
 
                 $(swa_url)
               onTimeout: "reject"
+          - task: AzureCLI@2
+            displayName: Delete dev environment
+            inputs:
+              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
+              scriptType: "pscore"
+              scriptLocation: "inlineScript"
+              inlineScript: "az group delete --name $(resourceGroup) --yes"
 
   - stage: QA
     dependsOn: dev_validation
