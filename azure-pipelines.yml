@@ -204,8 +204,8 @@ stages:
       - job: Deploy_Frontend
         displayName: Deploy Frontend
         dependsOn: 
-          IaC
-          Deploy_Contracts
+          - IaC
+          - Deploy_Contracts
         variables:
           # map the output variable from build stage into this job
           swaName: $[ dependencies.IaC.outputs['deploy.swaName'] ]
