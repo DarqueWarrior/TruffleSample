@@ -203,7 +203,7 @@ stages:
 
       - job: Deploy_Frontend
         displayName: Deploy Frontend
-        dependsOn: 
+        dependsOn:
           - IaC
           - Deploy_Contracts
         variables:
@@ -241,7 +241,7 @@ stages:
     displayName: Dev Validation
     variables:
       # map the output variable from A into this job
-      swa_url: $[ stageDependencies.Dev.Deploy.outputs['AzureStaticWebApp.static_web_app_url'] ]
+      swa_url: $[ stageDependencies.Dev.Deploy_Frontend.outputs['AzureStaticWebApp.static_web_app_url'] ]
     jobs:
       - job: waitForValidation
         displayName: Wait for external validation
@@ -257,17 +257,14 @@ stages:
                 Please validate the recent changes to your dApp and click resume.
 
                 $(swa_url)
+                [Test Link]($(swa_url))
+                <a href=$(swa_url)>Test Link</a>
               onTimeout: "reject"
-
-  - stage: QA
-    dependsOn: dev_validation
-    jobs:
-      - job: Deploy
+      - job: delete_dev
+        dependsOn: waitForValidation
         variables:
           # map the output variable from A into this job
-          resourceGroup: $[ dependencies.IaC.outputs['deploy.resourceGroup'] ]
-          deploymentToken: $[ stageDependencies.Dev.IaC.outputs['deploy.deploymentToken'] ]
-          contractAddress: $[ stageDependencies.Dev.IaC.outputs['contract.contractAddress'] ]
+          resourceGroup: $[ stageDependencies.Dev.IaC.outputs['deploy.resourceGroup'] ]
         steps:
           - task: AzureCLI@2
             displayName: Delete dev environment
@@ -276,6 +273,11 @@ stages:
               scriptType: "pscore"
               scriptLocation: "inlineScript"
               inlineScript: "az group delete --name $(resourceGroup) --yes"
+
+  - stage: QA
+    dependsOn: dev_validation
+    jobs:
+      - job: Deploy
 
   - stage: qa_validation
     displayName: QA Validation
