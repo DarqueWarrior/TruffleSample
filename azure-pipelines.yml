@@ -156,6 +156,148 @@ stages:
               workingDirectory: "$(Agent.BuildDirectory)/iac"
 
       - job: Deploy_Contracts
+        variables:
+          # map the output variable from build stage into this job
+          ganacheIp: $[ dependencies.IaC.outputs['deploy.ganacheIp'] ]
+        displayName: Deploy Contracts
+        dependsOn: IaC
+        container: darquewarrior/ethereum:0.1.4
+
+        steps:
+          - checkout: none
+          - download: none
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download artifacts
+
+          - script: npm install
+            displayName: "Install Truffle"
+            workingDirectory: $(Agent.BuildDirectory)/contracts
+
+          - script: "npx truffle migrate --network development --reset --compile-none"
+            displayName: Deploy contracts
+            workingDirectory: $(Agent.BuildDirectory)/contracts
+            env:
+              DEV_NETWORK: $(ganacheIp)
+
+          - pwsh: |
+              # Load the contract JSON that should have a single network property
+              # after the contract migration above
+              $contract = Get-Content ./client/src/contracts/SimpleStorage.json | ConvertFrom-Json
+
+              # The networkId is the name of the only property in the networks object
+              $networkId = $contract.networks[0] | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty name
+
+              # Get the address property
+              $address = $contract.networks.$networkId.address
+
+              if($address) {
+                Write-Host "##[section]Contract address: $address"
+              } else {
+                Write-Host "##vso[task.logissue type=error]Address not found"
+              }
+
+              Write-Host "##vso[task.setvariable variable=networkId;isOutput=true]$networkId"
+              Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
+            displayName: Find contract address
+            name: contract
+            workingDirectory: $(Agent.BuildDirectory)/contracts
+
+      - job: Deploy_Frontend
+        displayName: Deploy Frontend
+        dependsOn:
+          - IaC
+          - Deploy_Contracts
+        variables:
+          # map the output variable from build stage into this job
+          swaName: $[ dependencies.IaC.outputs['deploy.swaName'] ]
+          deploymentToken: $[ dependencies.IaC.outputs['deploy.deploymentToken'] ]
+          networkId: $[ dependencies.Deploy_Contracts.outputs['contract.networkId'] ]
+          contractAddress: $[ dependencies.Deploy_Contracts.outputs['contract.contractAddress'] ]
+
+        steps:
+          - checkout: none
+          - download: none
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download artifacts
+
+          - task: AzureStaticWebApp@0
+            displayName: Deploy frontend
+            inputs:
+              api_location: api
+              app_location: client
+              skip_app_build: true
+              workingDirectory: $(Pipeline.Workspace)
+              azure_static_web_apps_api_token: $(deploymentToken)
+
+          - task: AzureCLI@2
+            displayName: Configure API
+            inputs:
+              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
+              scriptType: "pscore"
+              scriptLocation: "inlineScript"
+              inlineScript: "az staticwebapp appsettings set --name $(swaName) --setting-names networkAddress=$(contractAddress) networkAddress_$(networkId)=$(contractAddress)"
+
+  - stage: dev_validation
+    displayName: Dev Validation
+    variables:
+      # map the output variable from A into this job
+      swa_url: $[ stageDependencies.Dev.Deploy_Frontend.outputs['AzureStaticWebApp.static_web_app_url'] ]
+    jobs:
+      - job: waitForValidation
+        displayName: Wait for external validation
+        pool: server
+        timeoutInMinutes: 1440 # job times out in 1 day
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 1440 # task times out in 1 day
+            inputs:
+              notifyUsers: |
+                $(Build.RequestedForEmail)
+              instructions: |
+                Please validate the recent changes to your dApp and click resume.
+
+                $(swa_url)
+              onTimeout: "reject"
+      - job: delete_dev
+        displayName: Delete Dev environment
+        dependsOn: waitForValidation
+        variables:
+          # map the output variable from A into this job
+          resourceGroup: $[ stageDependencies.Dev.IaC.outputs['deploy.resourceGroup'] ]
+        steps:
+          - task: AzureCLI@2
+            displayName: Delete Dev resource group
+            inputs:
+              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
+              scriptType: "pscore"
+              scriptLocation: "inlineScript"
+              inlineScript: "az group delete --name $(resourceGroup) --yes --no-wait"
+
+  - stage: QA
+    dependsOn: dev_validation
+    jobs:
+      - job: IaC
+        steps:
+          - checkout: none
+          - download: none
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download artifacts
+
+          - task: AzureCLI@2
+            name: deploy
+            displayName: Deploy SWA
+            inputs:
+              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
+              scriptType: "pscore"
+              scriptLocation: "scriptPath"
+              scriptPath: "$(Agent.BuildDirectory)/iac/deploy.ps1"
+              arguments: "-repoUrl $(Build.Repository.Uri) -rgName TruffleSample_qa -verbose"
+              workingDirectory: "$(Agent.BuildDirectory)/iac"
+
+      - job: Deploy_Contracts
         displayName: Deploy Contracts
         dependsOn: IaC
         container: darquewarrior/ethereum:0.1.4
@@ -237,48 +379,6 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: "az staticwebapp appsettings set --name $(swaName) --setting-names networkAddress=$(contractAddress) networkAddress_$(networkId)=$(contractAddress)"
 
-  - stage: dev_validation
-    displayName: Dev Validation
-    variables:
-      # map the output variable from A into this job
-      swa_url: $[ stageDependencies.Dev.Deploy_Frontend.outputs['AzureStaticWebApp.static_web_app_url'] ]
-    jobs:
-      - job: waitForValidation
-        displayName: Wait for external validation
-        pool: server
-        timeoutInMinutes: 1440 # job times out in 1 day
-        steps:
-          - task: ManualValidation@0
-            timeoutInMinutes: 1440 # task times out in 1 day
-            inputs:
-              notifyUsers: |
-                $(Build.RequestedForEmail)
-              instructions: |
-                Please validate the recent changes to your dApp and click resume.
-
-                $(swa_url)
-                [Test Link]($(swa_url))
-                <a href=$(swa_url)>Test Link</a>
-              onTimeout: "reject"
-      - job: delete_dev
-        dependsOn: waitForValidation
-        variables:
-          # map the output variable from A into this job
-          resourceGroup: $[ stageDependencies.Dev.IaC.outputs['deploy.resourceGroup'] ]
-        steps:
-          - task: AzureCLI@2
-            displayName: Delete dev environment
-            inputs:
-              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
-              scriptType: "pscore"
-              scriptLocation: "inlineScript"
-              inlineScript: "az group delete --name $(resourceGroup) --yes"
-
-  - stage: QA
-    dependsOn: dev_validation
-    jobs:
-      - job: Deploy
-
   - stage: qa_validation
     displayName: QA Validation
     variables:
@@ -300,6 +400,20 @@ stages:
 
                 $(swa_url)
               onTimeout: "reject"
+      - job: delete_qa
+        displayName: Delete QA environment
+        dependsOn: waitForValidation
+        variables:
+          # map the output variable from A into this job
+          resourceGroup: $[ stageDependencies.QA.IaC.outputs['deploy.resourceGroup'] ]
+        steps:
+          - task: AzureCLI@2
+            displayName: Delete QA resource environment
+            inputs:
+              azureSubscription: "ca-dbrown-demo-test(d3b805bb-2146-42a2-93fd-0b67c338317e)"
+              scriptType: "pscore"
+              scriptLocation: "inlineScript"
+              inlineScript: "az group delete --name $(resourceGroup) --yes --no-wait"
 
   - stage: Prod
     dependsOn: qa_validation
