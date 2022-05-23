@@ -8,14 +8,33 @@ resource ganache 'Microsoft.ContainerInstance/containerGroups@2021-10-01' = {
   }
   properties: {
     osType: 'Linux'
+    ipAddress: {
+      type: 'Public'
+      ports: [
+        {
+          port: 8545
+          protocol: 'TCP'
+        }
+      ]
+    }
     containers: [
       {
         name: 'ganache'
         properties: {
           command: [
-            'node /app/dist/node/cli.js --wallet.totalAccounts 4 --wallet.deterministic'
+            'node'
+            '/app/dist/node/cli.js'
+            '--wallet.totalAccounts'
+            '4'
+            '--wallet.deterministic'
           ]
           image: 'trufflesuite/ganache:latest'
+          ports: [
+            {
+              port: 8545
+              protocol: 'TCP'
+            }
+          ]
           resources: {
             requests: {
               cpu: 1

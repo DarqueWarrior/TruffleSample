@@ -5,7 +5,7 @@ param (
                 HelpMessage = "The name of the resource group to be created. All resources will be place in the resource group and start with name."
         )]
         [string]
-        $rgName = "swa_demo",
+        $rgName = "TruffleSample_dev",
 
         [Parameter(
                 Position = 1,
@@ -24,13 +24,15 @@ param (
 Write-Verbose $repoUrl
 
 Write-Output 'Deploying the Azure infrastructure'
+Write-Output "Deploy Ganache: $($deployGanache.IsPresent)"
+
 $deployment = $(az deployment sub create --name $rgName `
                 --location $location `
                 --template-file ./main.bicep `
                 --parameters location=$location `
                 --parameters rgName=$rgName `
                 --parameters repoUrl=$repoUrl `
-                --parameters deployGanache=$deployGanache.IsPresent `
+                --parameters deployGanache=$($deployGanache.IsPresent.ToString()) `
                 --output json) | ConvertFrom-Json
 
 # Store the outputs from the deployment
@@ -39,6 +41,7 @@ $deploymentToken = $deployment.properties.outputs.deploymentToken.value
 
 if ($deployGanache.IsPresent) {
         $ganacheIp = $deployment.properties.outputs.ganacheIp.value
+        Write-Host "The IP of Ganache is $ganacheIp"
         Write-Host "##vso[task.setvariable variable=ganacheIp;isOutput=true]$ganacheIp"
 }
 
