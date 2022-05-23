@@ -227,7 +227,6 @@ stages:
     displayName: Dev Validation
     variables:
       # map the output variable from A into this job
-      resourceGroup: $[ dependencies.IaC.outputs['deploy.resourceGroup'] ]
       swa_url: $[ stageDependencies.Dev.Deploy.outputs['AzureStaticWebApp.static_web_app_url'] ]
     jobs:
       - job: waitForValidation
@@ -245,6 +244,17 @@ stages:
 
                 $(swa_url)
               onTimeout: "reject"
+
+  - stage: QA
+    dependsOn: dev_validation
+    jobs:
+      - job: Deploy
+        variables:
+          # map the output variable from A into this job
+          resourceGroup: $[ dependencies.IaC.outputs['deploy.resourceGroup'] ]
+          deploymentToken: $[ stageDependencies.Dev.IaC.outputs['deploy.deploymentToken'] ]
+          contractAddress: $[ stageDependencies.Dev.IaC.outputs['contract.contractAddress'] ]
+        steps:
           - task: AzureCLI@2
             displayName: Delete dev environment
             inputs:
@@ -252,17 +262,6 @@ stages:
               scriptType: "pscore"
               scriptLocation: "inlineScript"
               inlineScript: "az group delete --name $(resourceGroup) --yes"
-
-  - stage: QA
-    dependsOn: dev_validation
-    jobs:
-      - job: Deploy
-        variables:
-          # map the output variable from build stage into this job
-          deploymentToken: $[ stageDependencies.Dev.IaC.outputs['deploy.deploymentToken'] ]
-          contractAddress: $[ stageDependencies.Dev.IaC.outputs['contract.contractAddress'] ]
-        steps:
-          - script: echo QA
 
   - stage: qa_validation
     displayName: QA Validation
