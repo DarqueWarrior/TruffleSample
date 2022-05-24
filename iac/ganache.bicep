@@ -27,6 +27,8 @@ resource ganache 'Microsoft.ContainerInstance/containerGroups@2021-10-01' = {
             '--wallet.totalAccounts'
             '4'
             '--wallet.deterministic'
+            '--chain.chainId'
+            '1352'
           ]
           image: 'trufflesuite/ganache:latest'
           ports: [
