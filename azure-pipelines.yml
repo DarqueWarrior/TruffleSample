@@ -197,6 +197,9 @@ stages:
                 Write-Host "##vso[task.logissue type=error]Address not found"
               }
 
+              Set-Content -Path address.md -Value "Ganache [IP](http://$($env:DEV_NETWORK):8545)`nNetwork ID: $networkId`nContract Address: $address" -Verbose
+              Write-Host ##vso[task.uploadsummary]address.md
+
               Write-Host "##vso[task.setvariable variable=networkId;isOutput=true]$networkId"
               Write-Host "##vso[task.setvariable variable=contractAddress;isOutput=true]$address"
             displayName: Find contract address
